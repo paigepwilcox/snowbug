@@ -1,3 +1,4 @@
+import bisect
 SNOWMAN_MIN_WORD_LENGTH = 5
 SNOWMAN_MAX_WORD_LENGTH = 8
 SNOWMAN_MAX_WRONG_GUESSES = 7
@@ -16,6 +17,7 @@ SNOWMAN_IMAGE = [
 def snowman(snowman_word):
     snowman_letters_guessed = build_word_dict(snowman_word)
     wrong_letters = []
+    
 
     while True:
         print(build_game_board(snowman_word, snowman_letters_guessed))
@@ -52,7 +54,8 @@ def build_snowman_graphic(num_wrong_guesses):
 
     # get the part of the snowman for the number of wrong guesses
     lines = []
-    for line_no in range(num_wrong_guesses - 1):
+    for line_no in range(num_wrong_guesses):
+        ## range(num_wrong_guesses - 1) had a off-by-one error so we need to get rid of -1
         lines.append(SNOWMAN_IMAGE[line_no])
 
     return "\n".join(lines)
@@ -82,7 +85,8 @@ def build_word_dict(word):
     word_dict = {}
     for letter in word:
         # keep track of any character a player might guess (alphabetic)
-        word_dict[letter] = False
+        if letter.isalpha():
+            word_dict[letter] = False
 
     return word_dict
 
@@ -100,7 +104,8 @@ def is_word_guessed(word_dict):
 def build_game_board(word, word_dict):
     output_letters = []
     for elem in word:
-        if elem in word_dict:
+        if not elem in word_dict:
+            ## since our dictionary does not include any elem that is not alpha but our word does include elem that is not alpha, we have to create the board with those spaces or hiffins included 
             # automatically add any character a player wouldn't be able to guess
             output_letters += elem
         elif word_dict[elem]:
@@ -109,13 +114,16 @@ def build_game_board(word, word_dict):
         else:
             # add a blank for any letter not yet guessed
             output_letters += "_"
-
+    
     return " ".join(output_letters)
 
 
 def add_wrong_letter(wrong_letters, letter):
     # track the wrong guesses in alphabetical order
+    # bisect.insort(wrong_letters, letter)
     wrong_letters.append(letter)
+    wrong_letters.sort()
+    
 
 
 # There are no issues in this function
